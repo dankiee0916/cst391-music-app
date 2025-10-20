@@ -9,7 +9,7 @@ export async function GET() {
   try {
     const db = getPool();
     const { rows } = await db.query('select now() as now');
-    return NextResponse.json({ time: rows[0], message: 'Database check OK' });
+    return NextResponse.json({ time: rows[0], message: 'Database check OK!' });
   } catch (err: any) {
     return NextResponse.json(
       { error: 'Database connection failed', details: err.message },
