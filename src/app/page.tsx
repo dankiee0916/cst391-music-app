@@ -6,14 +6,14 @@ import { get } from "@/lib/apiClient";
 import { Album } from "@/lib/types";
 import NavBar from "./components/NavBar";
 import AlbumCard from "./components/AlbumCard";
+import AlbumList from "./components/AlbumList";
 
 export default function Page() {
   const [searchPhrase, setSearchPhrase] = useState("");
   const [albumList, setAlbumList] = useState<Album[]>([]);
   const [currentlySelectedAlbumId, setCurrentlySelectedAlbumId] = useState(0);
   const [error, setError] = useState<string | null>(null);
-  const handleAlbumCardClick = (album: Album, uri: string) => {
-  // reuse your existing updateSingleAlbum logic
+  const handleAlbumClick = (album: Album, uri: string) => {
   updateSingleAlbum(album.id, uri);
 };
 
@@ -69,13 +69,16 @@ export default function Page() {
       <NavBar />
       <h1>Francisco's Album List (Debug View)</h1>
       <p>This JSON data is rendered directly from the API response.</p>
-      {!error && albumList.length > 0 && (
-        <AlbumCard
-          album={albumList[0]}
-          onClick={handleAlbumCardClick}
-        />
-      )}
-      
+{!error && albumList.length > 0 && (
+  <>
+    {/* AlbumCard demo of first album (can keep or remove, up to you) */}
+    {/* <AlbumCard album={albumList[0]} onClick={handleAlbumClick} /> */}
+
+    {/* Full AlbumList */}
+    <AlbumList albumList={albumList} onClick={handleAlbumClick} />
+  </>
+)}
+
       {error ? (
         <p>{error}</p>
       ) : (
