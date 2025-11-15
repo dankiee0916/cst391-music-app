@@ -1,95 +1,75 @@
-import Image from "next/image";
-import styles from "./page.module.css";
+"use client";
 
-export default function Home() {
+import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
+
+export default function Page() {
+  const [searchPhrase, setSearchPhrase] = useState("");
+  const [albumList, setAlbumList] = useState<any[]>([]);
+  const [currentlySelectedAlbumId, setCurrentlySelectedAlbumId] = useState(0);
+
+  let router = useRouter();
+
+  const loadAlbums = async () => {
+    const response = await fetch("/api/albums");
+    const data = await response.json();
+    console.log("Fetched albums:", data);
+    setAlbumList(data);
+  };
+
+  useEffect(() => {
+    loadAlbums();
+  }, []);
+
+  const updateSearchResults = async (phrase: string) => {
+    console.log("phrase is " + phrase);
+    setSearchPhrase(phrase);
+  };
+
+  const updateSingleAlbum = (albumId: number, uri: string) => {
+    console.log("Update Single Album = ", albumId);
+    const indexNumber = albumList.findIndex((a) => a.id === albumId);
+    setCurrentlySelectedAlbumId(indexNumber);
+    const path = `${uri}${indexNumber}`;
+    console.log("path", path);
+    router.push(path);
+  };
+
+  const renderedList = albumList.filter((album) => {
+    if (
+      (album.description ?? "").toLowerCase().includes(searchPhrase.toLowerCase()) ||
+      searchPhrase === ""
+    ) {
+      return true;
+    }
+    return false;
+  });
+
+  const onEditAlbum = () => {
+    loadAlbums();
+    router.push("/");
+  };
+
   return (
-    <div className={styles.page}>
-      <main className={styles.main}>
-        <Image
-          className={styles.logo}
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol>
-          <li>
-            My Name is Francisco Gonzalez
-          </li>
-          <li>Save and see your changes instantly.</li>
-        </ol>
+    <main>
+      <h1>Francisco's Album List (Debug View)</h1>
+      <p>This JSON data is rendered directly from the API response.</p>
 
-        <div className={styles.ctas}>
-          <a
-            className={styles.primary}
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className={styles.logo}
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-            className={styles.secondary}
-          >
-            Read our docs
-          </a>
-        </div>
-      </main>
-      <footer className={styles.footer}>
-        <a
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
-    </div>
+      <pre
+        style={{
+          backgroundColor: "#f4f4f4",
+          padding: "1rem",
+          borderRadius: "8px",
+          overflow: "auto",
+          color: "#111",
+          fontSize: "0.9rem",
+          lineHeight: "1.4",
+        }}
+      >
+        {albumList.length > 0 && JSON.stringify(albumList, null, 2)}
+      </pre>
+
+      {albumList.length === 0 && <p>Loading albums...</p>}
+    </main>
   );
 }
