@@ -71,9 +71,6 @@ export default function Page() {
       <p>This JSON data is rendered directly from the API response.</p>
 {!error && albumList.length > 0 && (
   <>
-    {/* AlbumCard demo of first album (can keep or remove, up to you) */}
-    {/* <AlbumCard album={albumList[0]} onClick={handleAlbumClick} /> */}
-
     {/* Full AlbumList */}
     <AlbumList albumList={albumList} onClick={handleAlbumClick} />
   </>
