@@ -5,14 +5,19 @@
 
 import { get, post, put } from "@/lib/apiClient";
 import { Album, Track } from "@/lib/types";
-import { useParams, useRouter } from "next/navigation";
+import { useParams, useRouter, usePathname } from "next/navigation"; // added usePathname
 import { useState, useEffect } from "react";
 
 export default function EditAlbumPage() {
     const router = useRouter();
-    // Next.js params hook replaces useParams from react-router
+
+    const pathname = usePathname();
+    const isReadOnly = pathname.startsWith("/show/");
+
     const params = useParams();
-    const albumId = params?.albumId; // undefined under /new
+    const albumId = params?.albumId as string | undefined;
+ 
+
     const defaultAlbum: Album = {
         id: 0,
         title: "",
@@ -27,43 +32,94 @@ export default function EditAlbumPage() {
     // Rather than the ad hoc album object used previously, this ensures correct typing and calms TypeScript
     const [album, setAlbum] = useState(defaultAlbum);
 
-    
+    // Load album only when editing or viewing
+   useEffect(() => {
+  if (!albumId) return; // creation mode (/new)
+  (async () => {
+    const res = await get<Album>(`/albums/by-id/${albumId}`);
+    setAlbum(res);
+  })();
+}, [albumId]);
 
-    // Load album only when editing
-    useEffect(() => {
-        if (!albumId) return; // creation mode
-        (async () => {
-            const res = await fetch(`/api/albums/${albumId}`);
-            if (!res.ok) return;
-            const data: Album = await res.json();
-            setAlbum(data);
-        })();
-    }, [albumId]);
+const handleSubmit = async (e: React.FormEvent) => {
+  e.preventDefault();
+  if (isReadOnly) {
+    return;
+  }
 
-    const handleSubmit = async (e: React.FormEvent) => {
-        e.preventDefault();
-        if (albumId) {
-            await put<Album, Album>(`/albums/${albumId}`, album);
-        } else {
-            await post<Album, Album>("/albums", album);
-        }
-        router.push("/");
-    };
+  if (albumId) {
+    await put<Album, Album>(`/albums/by-id/${albumId}`, album);  
+  } else {
+    await post<Album, Album>("/albums", album);
+  }
+  router.push("/");
+};
 
-    const onChange = (key: string) => (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) =>
-        setAlbum((prev) => ({ ...prev, [key]: e.target.value }));
+    const onChange =
+        (key: string) =>
+            (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) =>
+                setAlbum((prev) => ({ ...prev, [key]: e.target.value }));
+
+    // Heading changes depending on read-only / edit / create mode
+    const headingText = isReadOnly
+        ? "View Album"
+        : albumId
+            ? "Edit Album"
+            : "Create Album";
 
     return (
         <main style={{ padding: "1rem" }}>
-            <h1>{albumId ? "Edit Album" : "Create Album"}</h1>
+            <h1>{headingText}</h1>
+
             <form onSubmit={handleSubmit}>
-                <input placeholder="Title" value={album.title} onChange={onChange("title")} />
-                <input placeholder="Artist" value={album.artist} onChange={onChange("artist")} />
-                <input placeholder="Year" value={album.year ?? ""} onChange={onChange("year")} />
-                <textarea placeholder="Description" value={album.description} onChange={onChange("description")} />
-                <input placeholder="Image URL" value={album.image} onChange={onChange("image")} />
-                <button type="submit">{albumId ? "Update" : "Save"}</button>
+                <input
+                    placeholder="Title"
+                    value={album.title}
+                    onChange={onChange("title")}
+                    disabled={isReadOnly}
+                />
+                <input
+                    placeholder="Artist"
+                    value={album.artist}
+                    onChange={onChange("artist")}
+                    disabled={isReadOnly}
+                />
+                <input
+                    placeholder="Year"
+                    value={album.year ?? ""}
+                    onChange={onChange("year")}
+                    disabled={isReadOnly}
+                />
+                <textarea
+                    placeholder="Description"
+                    value={album.description}
+                    onChange={onChange("description")}
+                    disabled={isReadOnly}
+                />
+                <input
+                    placeholder="Image URL"
+                    value={album.image}
+                    onChange={onChange("image")}
+                    disabled={isReadOnly}
+                />
+
+                {/* In view mode show Home button only */}
+                {isReadOnly ? (
+                    <button
+                        type="button"
+                        style={{ marginTop: "10px" }}
+                        onClick={() => router.push("/")}
+                    >
+                        Home
+                    </button>
+                ) : (
+                    <button type="submit" style={{ marginTop: "10px" }}>
+                        {albumId ? "Update" : "Save"}
+                    </button>
+                )}
             </form>
         </main>
     );
+    console.log("PARAMS:", params);
+console.log("albumId:", albumId);
 }
