@@ -47,11 +47,16 @@ const handleSubmit = async (e: React.FormEvent) => {
     return;
   }
 
+   const payload = { ...album, albumId: album.id };
+
   if (albumId) {
-    await put<Album, Album>(`/albums/by-id/${albumId}`, album);  
+    // UPDATE existing album
+    await put<Album, Album>("/albums", payload);
   } else {
-    await post<Album, Album>("/albums", album);
+    // CREATE new album
+    await post<Album, Album>("/albums", payload);
   }
+
   router.push("/");
 };
 

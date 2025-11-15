@@ -14,8 +14,8 @@ export default function Page() {
   const [currentlySelectedAlbumId, setCurrentlySelectedAlbumId] = useState(0);
   const [error, setError] = useState<string | null>(null);
   const handleAlbumClick = (album: Album, uri: string) => {
-  updateSingleAlbum(album.id, uri);
-};
+    updateSingleAlbum(album.id, uri);
+  };
 
   let router = useRouter();
 
@@ -42,9 +42,8 @@ export default function Page() {
 
   const updateSingleAlbum = (albumId: number, uri: string) => {
     console.log("Update Single Album = ", albumId);
-    const indexNumber = albumList.findIndex((a) => a.id === albumId);
-    setCurrentlySelectedAlbumId(indexNumber);
-    const path = `${uri}${indexNumber}`;
+    setCurrentlySelectedAlbumId(albumId);
+    const path = `${uri}${albumId}`;
     console.log("path", path);
     router.push(path);
   };
@@ -69,12 +68,12 @@ export default function Page() {
       <NavBar />
       <h1>Francisco's Album List (Debug View)</h1>
       <p>This JSON data is rendered directly from the API response.</p>
-{!error && albumList.length > 0 && (
-  <>
-    {/* Full AlbumList */}
-    <AlbumList albumList={albumList} onClick={handleAlbumClick} />
-  </>
-)}
+      {!error && albumList.length > 0 && (
+        <>
+          {/* Full AlbumList */}
+          <AlbumList albumList={albumList} onClick={handleAlbumClick} />
+        </>
+      )}
 
       {error ? (
         <p>{error}</p>
