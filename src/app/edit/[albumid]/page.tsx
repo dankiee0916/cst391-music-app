@@ -2,6 +2,8 @@
 "use client";
 
 // use built-in fetch instead of a missing apiClient module
+
+import { get, post, put } from "@/lib/apiClient";
 import { Album, Track } from "@/lib/types";
 import { useParams, useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
@@ -25,6 +27,8 @@ export default function EditAlbumPage() {
     // Rather than the ad hoc album object used previously, this ensures correct typing and calms TypeScript
     const [album, setAlbum] = useState(defaultAlbum);
 
+    
+
     // Load album only when editing
     useEffect(() => {
         if (!albumId) return; // creation mode
@@ -38,13 +42,11 @@ export default function EditAlbumPage() {
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        const method = albumId ? "PUT" : "POST";
-        const url = albumId ? `/api/albums/${albumId}` : `/api/albums`;
-        await fetch(url, {
-            method,
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(album),
-        });
+        if (albumId) {
+            await put<Album, Album>(`/albums/${albumId}`, album);
+        } else {
+            await post<Album, Album>("/albums", album);
+        }
         router.push("/");
     };
 
