@@ -29,6 +29,10 @@ export default function NavBar() {
         <Link href="/search" style={{ color: "white" }}>
           Search
         </Link>
+
+        <Link href="/about" style={{ color: "white" }}>
+          About
+        </Link>
       </div>
     </nav>
   );

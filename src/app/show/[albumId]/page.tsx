@@ -5,4 +5,4 @@
 // "read-only" mode and display a view-only Album screen.
 // -----------------------------------------------
 
-export { default } from "@/app/edit/[albumId]/page";
+export { default } from "../../edit/[albumId]/page";
