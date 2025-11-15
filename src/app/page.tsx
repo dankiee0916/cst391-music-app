@@ -2,6 +2,8 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import NavBar from "./components/NavBar";
+
 
 export default function Page() {
   const [searchPhrase, setSearchPhrase] = useState("");
@@ -52,6 +54,7 @@ export default function Page() {
 
   return (
     <main>
+      <NavBar />
       <h1>Francisco's Album List (Debug View)</h1>
       <p>This JSON data is rendered directly from the API response.</p>
 
