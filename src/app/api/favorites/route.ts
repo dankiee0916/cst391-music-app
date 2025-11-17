@@ -1,20 +1,28 @@
 import { NextResponse } from 'next/server';
-import { sql } from '@vercel/postgres';
+import { getPool } from '@/lib/db';   // <-- use your shared pool
 
 // GET /api/favorites  -> list all favorites
 export async function GET() {
   try {
-    const result =
-      await sql`SELECT f.id,
-                       f.album_id,
-                       f.created_at,
-                       a.title,
-                       a.artist
-                 FROM favorites f
-                 JOIN albums a ON f.album_id = a.id
-                 ORDER BY f.created_at DESC;`;
+    const pool = getPool();
 
-    return NextResponse.json(result.rows, { status: 200 });
+    // DEBUG: see which DB we are actually connected to
+    const dbInfo = await pool.query('SELECT current_database(), current_schema();');
+    console.log('DB info from /favorites:', dbInfo.rows);
+
+    const { rows } = await pool.query(`
+      SELECT
+        f.id,
+        f.album_id,
+        f.created_at,
+        a.title,
+        a.artist
+      FROM favorites f
+      JOIN albums a ON f.album_id = a.id
+      ORDER BY f.created_at DESC;
+    `);
+
+    return NextResponse.json(rows, { status: 200 });
   } catch (err) {
     console.error('GET /favorites error', err);
     return NextResponse.json(
@@ -37,12 +45,17 @@ export async function POST(request: Request) {
       );
     }
 
-    const result =
-      await sql`INSERT INTO favorites (album_id)
-                VALUES (${albumId})
-                RETURNING id, album_id, created_at;`;
+    const pool = getPool();
+    const { rows } = await pool.query(
+      `
+      INSERT INTO favorites (album_id)
+      VALUES ($1)
+      RETURNING id, album_id, created_at;
+      `,
+      [albumId]
+    );
 
-    return NextResponse.json(result.rows[0], { status: 201 });
+    return NextResponse.json(rows[0], { status: 201 });
   } catch (err) {
     console.error('POST /favorites error', err);
     return NextResponse.json(
