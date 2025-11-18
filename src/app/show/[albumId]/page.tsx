@@ -1,3 +1,4 @@
+"use client";
 // app/show/[albumId]/page.tsx
 // -----------------------------------------------
 // Reuse the edit page component for the /show route.

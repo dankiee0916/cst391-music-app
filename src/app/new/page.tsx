@@ -1,3 +1,4 @@
+"use client";
 // app/new/page.tsx
 // ------------------------------------------------------------
 // Reuse the edit page component for the /new route.

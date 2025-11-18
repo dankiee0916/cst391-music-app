@@ -1,5 +1,5 @@
-// app/edit/[albumId]/page.tsx
 "use client";
+// app/edit/[albumId]/page.tsx
 
 // use built-in fetch instead of a missing apiClient module
 

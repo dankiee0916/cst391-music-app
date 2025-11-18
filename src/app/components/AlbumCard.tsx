@@ -1,3 +1,4 @@
+"use client";
 // A component to display individual album info, not included in Next.js routing
 // app\components\AlbumCard.tsx 
 // Define the shape of props expected by the AlbumCard component.
@@ -19,12 +20,17 @@ interface AlbumCardProps {
     // This ensures that any click handler passed to AlbumCard
     // adheres to this exact signature, preventing runtime errors.
     onClick: (album: Album, uri: string) => void;
+
+    // For UI control (guest/user/admin)
+    canView: boolean;
+    canEdit: boolean;
 }
 
 // Export a functional React component named AlbumCard.
 // The props are destructured directly in the parameter list,
 // and their shape is validated against the AlbumCardProps interface.
-export default function AlbumCard({ album, onClick }: AlbumCardProps) {
+export default function AlbumCard({ album, onClick, canView, canEdit }: AlbumCardProps) {
+
     const handleButtonClick = (uri: string) => {
         console.log("ID clicked is " + album.id);
         onClick(album, uri);
@@ -47,19 +53,26 @@ export default function AlbumCard({ album, onClick }: AlbumCardProps) {
                 <h5 className="card-title">{album.title}</h5>
                 <p className="card-text">{album.description}</p>
 
-                <button
-                    onClick={() => handleButtonClick("/show/")}
-                    className="btn btn-primary"
-                >
-                    View
-                </button>
+                {/* Show "View" only if allowed */}
+                {canView && (
+                    <button
+                        onClick={() => handleButtonClick("/show/")}
+                        className="btn btn-primary"
+                    >
+                        View
+                    </button>
+                )}
 
-                <button
-                    onClick={() => handleButtonClick("/edit/")}
-                    className="btn btn-secondary"
-                >
-                    Edit
-                </button>
+                {/* Show "Edit" only if admin */}
+                {canEdit && (
+                    <button
+                        onClick={() => handleButtonClick("/edit/")}
+                        className="btn btn-secondary"
+                        style={{ marginLeft: "8px" }}
+                    >
+                        Edit
+                    </button>
+                )}
             </div>
         </div>
     );
