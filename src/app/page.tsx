@@ -66,7 +66,7 @@ export default function Page() {
   return (
     <main>
       <NavBar />
-      <h1>Francisco's Album List (Debug View)</h1>
+      <h1>Francisco's Album List</h1>
       <p>This JSON data is rendered directly from the API response.</p>
       {!error && albumList.length > 0 && (
         <>
@@ -75,22 +75,8 @@ export default function Page() {
         </>
       )}
 
-      {error ? (
+      {error && (
         <p>{error}</p>
-      ) : (
-        <pre
-          style={{
-            backgroundColor: "#000000ff",
-            padding: "1rem",
-            borderRadius: "8px",
-            overflow: "auto",
-            color: "#ffffffff",
-            fontSize: "0.9rem",
-            lineHeight: "1.4",
-          }}
-        >
-          {albumList.length > 0 && JSON.stringify(albumList, null, 2)}
-        </pre>
       )}
 
       {!error && albumList.length === 0 && <p>Loading albums...</p>}

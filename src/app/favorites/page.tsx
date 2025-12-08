@@ -1,22 +1,59 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import { get, del } from "@/lib/apiClient";
-import NavBar from "@/app/components/NavBar";
+import { Album } from "@/lib/types";
+import { useSession } from "next-auth/react";
+import NavBar from "../components/NavBar";
+import AlbumCard from "../components/AlbumCard";
 
-// basic shape of a favorite row coming back from /api/favorites
+// shape of one favorite row from /api/favorites
 type FavoriteRow = {
-  id: number;
-  album_id: number;
+  id: number;                
+  album_id: number;          
   created_at: string;
   title: string;
   artist: string;
+  year?: number | null;
+  image?: any;
+  description: string;
 };
 
 export default function FavoritesPage() {
   const [favorites, setFavorites] = useState<FavoriteRow[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
+
+  const router = useRouter();
+  const { data: session } = useSession();
+
+  const userEmail = session?.user?.email ?? "";
+  const isLoggedIn = !!session?.user;
+
+  // same idea as AlbumList: env var for admins
+  const adminEmails =
+    process.env.NEXT_PUBLIC_ADMIN_EMAILS?.split(",") ?? [];
+  const isAdmin = adminEmails.includes(userEmail);
+
+  // turn one FavoriteRow into an Album object for AlbumCard
+  const mapFavoriteToAlbum = (fav: FavoriteRow): Album => {
+    return {
+      id: fav.album_id,
+      title: fav.title,
+      artist: fav.artist,
+      year: fav.year ?? null,
+      image: fav.image,
+      description: fav.description,
+      tracks: [], // not needed here
+    };
+  };
+
+  // handle clicking "View" / "Edit" inside the card
+  const handleAlbumClick = (album: Album, uri: string) => {
+    const path = `${uri}${album.id}`;
+    router.push(path);
+  };
 
   // load favorites for the current user
   const loadFavorites = async () => {
@@ -28,7 +65,6 @@ export default function FavoritesPage() {
       setFavorites(data);
     } catch (err) {
       console.error("GET /favorites UI error", err);
-      // simple error message, API already logs details
       setError("Could not load favorites. Make sure you are signed in.");
       setFavorites([]);
     } finally {
@@ -41,9 +77,9 @@ export default function FavoritesPage() {
   }, []);
 
   // remove one favorite, then refresh list
-  const handleDelete = async (id: number) => {
+  const handleDelete = async (favoriteId: number) => {
     try {
-      await del<{ message: string }>(`/favorites/${id}`);
+      await del<{ message: string }>(`/favorites/${favoriteId}`);
       await loadFavorites();
     } catch (err) {
       console.error("DELETE /favorites UI error", err);
@@ -51,50 +87,69 @@ export default function FavoritesPage() {
   };
 
   return (
-    <main style={{ padding: "1rem" }}>
+    <main>
       <NavBar />
 
-      <h1>My Favorites</h1>
-      <p>Favorites are tied to the logged-in GitHub account.</p>
+      <div style={{ padding: "1rem" }}>
+        <h1>My Favorites</h1>
+        <p>Favorites are tied to the logged-in GitHub account.</p>
 
-      {loading && <p>Loading favorites...</p>}
+        {loading && <p>Loading favorites...</p>}
 
-      {error && !loading && <p>{error}</p>}
+        {error && !loading && <p>{error}</p>}
 
-      {!loading && !error && favorites.length === 0 && (
-        <p>No favorites yet. Open an album and add one.</p>
-      )}
+        {!loading && !error && favorites.length === 0 && (
+          <p>No favorites yet. Open an album and add one.</p>
+        )}
 
-      {!loading && favorites.length > 0 && (
-        <table className="table">
-          <thead>
-            <tr>
-              <th>Album</th>
-              <th>Artist</th>
-              <th>Added</th>
-              <th></th>
-            </tr>
-          </thead>
-          <tbody>
-            {favorites.map((fav) => (
-              <tr key={fav.id}>
-                <td>{fav.title}</td>
-                <td>{fav.artist}</td>
-                <td>{new Date(fav.created_at).toLocaleString()}</td>
-                <td>
+        {/* Card grid */}
+        {!loading && favorites.length > 0 && (
+          <div
+            style={{
+              display: "flex",
+              flexWrap: "wrap",
+              gap: "1rem",
+              justifyContent: "flex-start",
+            }}
+          >
+            {favorites.map((fav) => {
+              const album = mapFavoriteToAlbum(fav);
+
+              return (
+                <div
+                  key={fav.id}
+                  style={{
+                    display: "flex",
+                    flexDirection: "column",
+                    alignItems: "flex-start",
+                    gap: "0.5rem",
+                  }}
+                >
+                  <AlbumCard
+                    album={album}
+                    onClick={handleAlbumClick}
+                    canView={isLoggedIn}
+                    canEdit={isAdmin}
+                  />
+
+                  {/* simple remove button under the card */}
                   <button
                     type="button"
                     className="btn btn-sm btn-danger"
                     onClick={() => handleDelete(fav.id)}
                   >
-                    Remove
+                    Remove Favorite
                   </button>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      )}
+
+                  <small>
+                    Added: {new Date(fav.created_at).toLocaleString()}
+                  </small>
+                </div>
+              );
+            })}
+          </div>
+        )}
+      </div>
     </main>
   );
 }
