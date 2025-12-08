@@ -15,6 +15,7 @@ export default function NavBar() {
         padding: "10px",
         display: "flex",
         justifyContent: "space-between",
+        alignItems: "center",
       }}
     >
       <div style={{ fontWeight: "bold", fontSize: "1.2rem" }}>
@@ -29,6 +30,13 @@ export default function NavBar() {
         {isLoggedIn && (
           <Link href="/new" style={{ color: "white" }}>
             Add Album
+          </Link>
+        )}
+
+        {/* only signed-in users can see Favorites */}
+        {isLoggedIn && (
+          <Link href="/favorites" style={{ color: "white" }}>
+            Favorites
           </Link>
         )}
 

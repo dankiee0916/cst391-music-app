@@ -1,65 +1,67 @@
-import { NextResponse } from 'next/server';
-import { getPool } from '@/lib/db';   // <-- use your shared pool
+import { NextResponse } from "next/server";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/app/api/auth/[...nextauth]/route";
+import { listFavorites, createFavorite } from "@/lib/services/favoriteService";
 
-// GET /api/favorites  -> list all favorites
+// GET /api/favorites
+// returns ONLY the favorites that belong to the logged-in user
 export async function GET() {
   try {
-    const pool = getPool();
+    // checking logged-in user
+    const session = await getServerSession(authOptions);
 
-    // DEBUG: see which DB we are actually connected to
-    const dbInfo = await pool.query('SELECT current_database(), current_schema();');
-    console.log('DB info from /favorites:', dbInfo.rows);
+    // if not signed in → can't see any favorites
+    if (!session?.user?.email) {
+      return NextResponse.json({ message: "not authorized" }, { status: 401 });
+    }
 
-    const { rows } = await pool.query(`
-      SELECT
-        f.id,
-        f.album_id,
-        f.created_at,
-        a.title,
-        a.artist
-      FROM favorites f
-      JOIN albums a ON f.album_id = a.id
-      ORDER BY f.created_at DESC;
-    `);
+    const email = session.user.email;
+
+    // use the service layer so routes stay clean
+    const rows = await listFavorites(email);
 
     return NextResponse.json(rows, { status: 200 });
   } catch (err) {
-    console.error('GET /favorites error', err);
+    console.error("GET /favorites error", err);
     return NextResponse.json(
-      { message: 'Failed to load favorites' },
+      { message: "Failed to load favorites" },
       { status: 500 }
     );
   }
 }
 
-// POST /api/favorites  -> add a new favorite
+// POST /api/favorites
+// adds a favorite tied to the logged-in user's email
 export async function POST(request: Request) {
   try {
+    const session = await getServerSession(authOptions);
+
+    // user must be signed in to add favorites
+    if (!session?.user?.email) {
+      return NextResponse.json({ message: "not authorized" }, { status: 401 });
+    }
+
     const body = await request.json();
     const { albumId } = body;
 
+    // quick validation
     if (!albumId) {
       return NextResponse.json(
-        { message: 'albumId is required' },
+        { message: "albumId is required" },
         { status: 400 }
       );
     }
 
-    const pool = getPool();
-    const { rows } = await pool.query(
-      `
-      INSERT INTO favorites (album_id)
-      VALUES ($1)
-      RETURNING id, album_id, created_at;
-      `,
-      [albumId]
-    );
+    const email = session.user.email;
 
-    return NextResponse.json(rows[0], { status: 201 });
+    // create the favorite through service
+    const favorite = await createFavorite(albumId, email);
+
+    return NextResponse.json(favorite, { status: 201 });
   } catch (err) {
-    console.error('POST /favorites error', err);
+    console.error("POST /favorites error", err);
     return NextResponse.json(
-      { message: 'Failed to create favorite' },
+      { message: "Failed to create favorite" },
       { status: 500 }
     );
   }
