@@ -67,7 +67,7 @@ export default function Page() {
     <main>
       <NavBar />
       <h1>Francisco's Album List</h1>
-      <p>This JSON data is rendered directly from the API response.</p>
+      <p>This is a list of albums I listen to on a daily!</p>
       {!error && albumList.length > 0 && (
         <>
           {/* Full AlbumList */}
