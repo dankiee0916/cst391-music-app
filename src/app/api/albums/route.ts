@@ -55,6 +55,7 @@ export async function GET(request: NextRequest) {
       year: album.year,
       image: album.image,
       description: album.description,
+      createdBy: (album as any).created_by ?? null,
       tracks: tracksByAlbum[album.id] || [],
     }));
 
