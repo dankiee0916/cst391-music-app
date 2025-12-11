@@ -13,9 +13,6 @@ export default function Page() {
   const [albumList, setAlbumList] = useState<Album[]>([]);
   const [currentlySelectedAlbumId, setCurrentlySelectedAlbumId] = useState(0);
   const [error, setError] = useState<string | null>(null);
-  const handleAlbumClick = (album: Album, uri: string) => {
-    updateSingleAlbum(album.id, uri);
-  };
 
   let router = useRouter();
 
@@ -48,6 +45,30 @@ export default function Page() {
     router.push(path);
   };
 
+  const handleAlbumClick = async (album: Album, uri: string) => {
+    if (uri === "/delete/") {
+      const confirmed = window.confirm(
+        `Are you sure you want to delete "${album.title}"?`
+      );
+      if (!confirmed) return;
+
+      const res = await fetch(`/api/albums/by-id/${album.id}`, {
+        method: "DELETE",
+      });
+
+      if (!res.ok) {
+        alert("Failed to delete album");
+        return;
+      }
+
+      // refresh list after delete
+      await loadAlbums();
+      return;
+    }
+
+    updateSingleAlbum(album.id, uri);
+  };
+
   const renderedList = albumList.filter((album) => {
     if (
       (album.description ?? "").toLowerCase().includes(searchPhrase.toLowerCase()) ||
@@ -75,9 +96,7 @@ export default function Page() {
         </>
       )}
 
-      {error && (
-        <p>{error}</p>
-      )}
+      {error && <p>{error}</p>}
 
       {!error && albumList.length === 0 && <p>Loading albums...</p>}
     </main>

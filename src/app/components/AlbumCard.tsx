@@ -73,6 +73,17 @@ export default function AlbumCard({ album, onClick, canView, canEdit }: AlbumCar
                         Edit
                     </button>
                 )}
+
+                {/* Show "Delete" only if allowed (admin or owner) */}
+                {canEdit && (
+                    <button
+                        onClick={() => handleButtonClick("/delete/")}
+                        className="btn btn-danger"
+                        style={{ marginLeft: "8px" }}
+                    >
+                        Delete
+                    </button>
+                )}
             </div>
         </div>
     );

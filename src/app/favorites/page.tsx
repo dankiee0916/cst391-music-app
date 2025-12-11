@@ -50,10 +50,29 @@ export default function FavoritesPage() {
   };
 
   // handle clicking "View" / "Edit" inside the card
-  const handleAlbumClick = (album: Album, uri: string) => {
-    const path = `${uri}${album.id}`;
-    router.push(path);
-  };
+ const handleAlbumClick = async (album: Album, uri: string) => {
+  if (uri === "/delete/") {
+    const confirmed = window.confirm(
+      `Are you sure you want to delete "${album.title}"?`
+    );
+    if (!confirmed) return;
+
+    const res = await fetch(`/api/albums/by-id/${album.id}`, {
+      method: "DELETE",
+    });
+
+    if (!res.ok) {
+      alert("Failed to delete album");
+      return;
+    }
+
+    // simple way: reload page so the list updates
+    window.location.reload();
+  } else {
+    router.push(uri + album.id);
+  }
+};
+
 
   // load favorites for the current user
   const loadFavorites = async () => {

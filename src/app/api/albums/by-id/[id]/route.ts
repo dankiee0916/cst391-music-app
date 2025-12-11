@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getPool } from '@/lib/db';
 import type { Album, Track } from '@/lib/types';
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 
 export const runtime = 'nodejs';
 
@@ -66,5 +68,60 @@ export async function GET(
   } catch (err) {
     console.error(`GET /api/albums/by-id/${id} error:`, err);
     return NextResponse.json({ error: 'Failed to fetch album by id' }, { status: 500 });
+  }
+}
+
+export async function DELETE(
+  _req: NextRequest,
+  context: { params: Promise<{ id: string }> }
+) {
+  const { id } = await context.params;
+  const albumId = Number(id);
+
+  if (Number.isNaN(albumId)) {
+    return NextResponse.json({ error: "Invalid id" }, { status: 400 });
+  }
+
+  const session = await getServerSession(authOptions);
+  if (!session?.user?.email) {
+    return NextResponse.json({ error: "not authorized" }, { status: 401 });
+  }
+
+  const email = session.user.email;
+  const role = (session.user as any).role;
+  const isAdmin = role === "admin";
+
+  try {
+    const pool = getPool();
+
+    let result;
+    if (isAdmin) {
+      // admin can delete any album
+      result = await pool.query(
+        `DELETE FROM albums WHERE id = $1`,
+        [albumId]
+      );
+    } else {
+      // normal user can only delete their own albums
+      result = await pool.query(
+        `DELETE FROM albums WHERE id = $1 AND created_by = $2`,
+        [albumId, email]
+      );
+    }
+
+    if (result.rowCount === 0) {
+      return NextResponse.json(
+        { error: "not found or not allowed" },
+        { status: 403 }
+      );
+    }
+
+    return NextResponse.json({ message: "deleted" }, { status: 200 });
+  } catch (err) {
+    console.error(`DELETE /api/albums/by-id/${id} error:`, err);
+    return NextResponse.json(
+      { error: "Failed to delete album" },
+      { status: 500 }
+    );
   }
 }
