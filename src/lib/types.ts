@@ -21,6 +21,7 @@ export type Album = {
   image?: any;              
   description: string;
   tracks: Track[];          
+  createdBy?: string | null;   // email of the user who created the album
 };
 
 // ---- reference DB row names elsewhere, you can alias: ----

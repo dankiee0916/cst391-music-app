@@ -58,6 +58,7 @@ export async function GET(
       year: album.year,
       image: album.image,
       description: album.description,
+      createdBy: album.created_by ?? null,
       tracks,
     };
 

@@ -7,6 +7,10 @@ export default function NavBar() {
   const { data: session } = useSession();
   const isLoggedIn = !!session;
 
+  // pull email + role off the session 
+  const userEmail = session?.user?.email ?? "";
+  const userRole = (session?.user as any)?.role as "admin" | "user" | undefined;
+
   return (
     <nav
       style={{
@@ -19,10 +23,16 @@ export default function NavBar() {
       }}
     >
       <div style={{ fontWeight: "bold", fontSize: "1.2rem" }}>
-        Francisco's Music App
+        Francisco&apos;s Music App
       </div>
 
-      <div style={{ display: "flex", gap: "15px", alignItems: "center" }}>
+      <div
+        style={{
+          display: "flex",
+          gap: "15px",
+          alignItems: "center",
+        }}
+      >
         <Link href="/" style={{ color: "white" }}>
           Home
         </Link>
@@ -33,7 +43,6 @@ export default function NavBar() {
           </Link>
         )}
 
-        {/* only signed-in users can see Favorites */}
         {isLoggedIn && (
           <Link href="/favorites" style={{ color: "white" }}>
             Favorites
@@ -47,6 +56,20 @@ export default function NavBar() {
         <Link href="/about" style={{ color: "white" }}>
           About
         </Link>
+
+        {/* show who is logged in + role when signed in */}
+        {isLoggedIn && (
+          <span
+            style={{
+              fontSize: "0.85rem",
+              opacity: 0.9,
+              marginRight: "8px",
+            }}
+          >
+            {userEmail}
+            {userRole && ` (${userRole})`}
+          </span>
+        )}
 
         {!isLoggedIn && (
           <button

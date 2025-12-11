@@ -63,7 +63,7 @@ export default function AlbumCard({ album, onClick, canView, canEdit }: AlbumCar
                     </button>
                 )}
 
-                {/* Show "Edit" only if admin */}
+                {/* Show "Edit" only if allowed (admin or owner) */}
                 {canEdit && (
                     <button
                         onClick={() => handleButtonClick("/edit/")}
