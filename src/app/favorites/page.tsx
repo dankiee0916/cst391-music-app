@@ -148,8 +148,8 @@ export default function FavoritesPage() {
                     album={album}
                     onClick={handleAlbumClick}
                     canView={isLoggedIn}
-                    canEdit={isAdmin}
-                  />
+                    canEdit={isAdmin} 
+                 />
 
                   {/* simple remove button under the card */}
                   <button

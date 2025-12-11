@@ -27,13 +27,18 @@ export default function AlbumList({ albumList, onClick }: AlbumListProps) {
     // can edit if admin or owner
     const canEdit = isAdmin || isOwner;
 
+    // can delete if admin or owner
+    const canDelete = isAdmin || isOwner;
+
     return (
       <AlbumCard
         key={album.id}
         album={album}
         onClick={onClick}
         canView={isLoggedIn}  // guests: false, users/admin: true
-        canEdit={canEdit}     // admins or owners can edit
+        canEdit={canEdit} // admins/owners: true, users/guests: false
+        canDelete={canDelete} // admins/owners: true, users/guests: false
+           
       />
     );
   });

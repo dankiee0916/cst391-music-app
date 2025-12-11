@@ -24,12 +24,14 @@ interface AlbumCardProps {
     // For UI control (guest/user/admin)
     canView: boolean;
     canEdit: boolean;
+    canDelete?: boolean;
+
 }
 
 // Export a functional React component named AlbumCard.
 // The props are destructured directly in the parameter list,
 // and their shape is validated against the AlbumCardProps interface.
-export default function AlbumCard({ album, onClick, canView, canEdit }: AlbumCardProps) {
+export default function AlbumCard({ album, onClick, canView, canEdit, canDelete }: AlbumCardProps) {
 
     const handleButtonClick = (uri: string) => {
         console.log("ID clicked is " + album.id);
@@ -75,7 +77,7 @@ export default function AlbumCard({ album, onClick, canView, canEdit }: AlbumCar
                 )}
 
                 {/* Show "Delete" only if allowed (admin or owner) */}
-                {canEdit && (
+                {canDelete && (
                     <button
                         onClick={() => handleButtonClick("/delete/")}
                         className="btn btn-danger"
