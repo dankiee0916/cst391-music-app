@@ -40,15 +40,25 @@ export const authOptions: NextAuthOptions = {
             }
 
             // Simple admin allowlist via env var
-            const admins = (process.env.ADMIN_EMAILS ?? "").split(",");
-            token.role = admins.includes(token.email ?? "") ? "admin" : "user";
+            const rawAdmins = process.env.ADMIN_EMAILS ?? "";
+
+            // split the env var on commas, trim spaces, drop empties, and lowercase everything
+            const admins = rawAdmins
+                .split(",")
+                .map((e) => e.trim().toLowerCase())
+                .filter(Boolean);
+
+            const email = (token.email ?? "").toLowerCase();
+
+            // if email is in the admin list → admin, else user
+            token.role = admins.includes(email) ? "admin" : "user";
 
             return token;
         },
 
         /**
          * Session callback: runs whenever `useSession` / `getServerSession` is used.
-         * We copy our custom token.role → session.user.role so the client can see it.
+         * Copy the custom token.role and session.user.role so the client can see it.
          */
         async session({
             session,

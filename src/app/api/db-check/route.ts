@@ -15,7 +15,7 @@ export async function GET() {
     return NextResponse.json({ time: now, artist: artist, message: `Francisco's Database connection successful. Running in ${environment}. DATABASE_URL: ${dbUrl}` }, { status: 200 });
   } catch (err) {
     return NextResponse.json({ error: 'Database connection failed',
-       details: (err as Error).message, message: `Sparks Database connection failed. Running in ${environment}. DATABASE_URL: ${dbUrl}` }, { status: 500 });
+       details: (err as Error).message, message: `Francisco's Database connection failed. Running in ${environment}. DATABASE_URL: ${dbUrl}` }, { status: 500 });
   }
 
 }

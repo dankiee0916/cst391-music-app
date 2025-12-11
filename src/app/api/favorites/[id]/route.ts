@@ -29,7 +29,7 @@ export async function DELETE(
     const email = session.user.email;
     const isAdmin = (session.user as any).role === "admin";
 
-    // service handles the logic (admin override vs normal user)
+    // service handles the logic
     const success = await removeFavorite(Number(id), email, isAdmin);
 
     // nothing matched this ID or user didn't own it
