@@ -10,14 +10,14 @@ export async function GET() {
     // checking logged-in user
     const session = await getServerSession(authOptions);
 
-    // if not signed in → can't see any favorites
+    // if not signed in, guests can't see any favorites
     if (!session?.user?.email) {
       return NextResponse.json({ message: "not authorized" }, { status: 401 });
     }
 
     const email = session.user.email;
 
-    // use the service layer so routes stay clean
+    // use the service layer
     const rows = await listFavorites(email);
 
     return NextResponse.json(rows, { status: 200 });

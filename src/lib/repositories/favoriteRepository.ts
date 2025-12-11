@@ -44,8 +44,8 @@ export async function addFavorite(albumId: number, email: string) {
 export async function deleteFavorite(id: number, email: string, isAdmin: boolean) {
   const pool = getPool();
 
-  // if admin → can remove anything
-  // if user → can only delete their own favorites
+  // if admin - can remove anything
+  // if user - can only delete their own favorites
   const query = isAdmin
     ? `DELETE FROM favorites WHERE id = $1`
     : `DELETE FROM favorites WHERE id = $1 AND user_email = $2`;
@@ -53,5 +53,5 @@ export async function deleteFavorite(id: number, email: string, isAdmin: boolean
   const params = isAdmin ? [id] : [id, email];
 
   const result = await pool.query(query, params);
-  return (result.rowCount ?? 0) > 0; // true if something was actually deleted
+  return (result.rowCount ?? 0) > 0; 
 }
