@@ -12,7 +12,7 @@ interface AlbumListProps {
 export default function AlbumList({ albumList, onClick }: AlbumListProps) {
   const { data: session } = useSession();
 
-  // Read allowed admin emails from env (comma-separated)
+  // Read allowed admin emails from env
   const adminEmails =
     process.env.NEXT_PUBLIC_ADMIN_EMAILS?.split(",") ?? [];
 
